@@ -1,4 +1,4 @@
-export interface BlogEntry {
+export class BlogEntry {
   title: string;
   //ownerId: string;
   dateTime: Date;
