@@ -70,4 +70,25 @@ export class BlogsService {
 
     return blog;
   }
+
+  async createBlogEntry(
+    blogId: string,
+    createBlogEntryDto: CreateBlogEntryDto,
+  ): Promise<BlogEntry> {
+    const { title, content } = createBlogEntryDto;
+    const blogEntry: BlogEntry = {
+      title,
+      content,
+      dateTime: new Date(),
+    };
+
+    const found = this.blogs.find((blog) => blog.id === blogId);
+    if (!found) {
+      throw new NotFoundException();
+    }
+
+    found.blogEntryList.push(blogEntry);
+    await this.writeBlogs();
+    return blogEntry;
+  }
 }

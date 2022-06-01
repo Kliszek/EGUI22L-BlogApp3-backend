@@ -17,4 +17,12 @@ export class BlogsController {
   async createBlog(@Body() createBlogDto: CreateBlogDto): Promise<Blog> {
     return this.blogsService.createBlog(createBlogDto);
   }
+
+  @Post('/:id')
+  async createBlogEntry(
+    @Body() createBlogEntryDto: CreateBlogEntryDto,
+    @Param('id') blogId: string,
+  ): Promise<BlogEntry> {
+    return this.blogsService.createBlogEntry(blogId, createBlogEntryDto);
+  }
 }
