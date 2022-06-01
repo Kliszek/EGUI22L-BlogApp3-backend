@@ -55,6 +55,29 @@ export class BlogsService {
     return this.blogs;
   }
 
+  async getBlog(blogId: string): Promise<Blog> {
+    const foundBlog: Blog = this.blogs.find((blog) => blog.id === blogId);
+    if (!foundBlog) {
+      throw new NotFoundException('Blog with this ID does not exist!');
+    }
+    return foundBlog;
+  }
+
+  private async getBlogEntry(
+    blogId: string,
+    blogEntryId: string,
+  ): Promise<BlogEntry> {
+    const foundBlog: Blog = await this.getBlog(blogId);
+
+    const foundBlogEntry: BlogEntry = foundBlog.blogEntryList.find(
+      (blogEntry) => blogEntry.id === blogEntryId,
+    );
+    if (!foundBlogEntry) {
+      throw new NotFoundException('Blog Entry with this ID does not exist!');
+    }
+    return foundBlogEntry;
+  }
+
   async createBlog(createBlogDto: CreateBlogDto): Promise<Blog> {
     const { title } = createBlogDto;
 
@@ -84,10 +107,7 @@ export class BlogsService {
       dateTime: new Date(),
     };
 
-    const found = this.blogs.find((blog) => blog.id === blogId);
-    if (!found) {
-      throw new NotFoundException('Blog with this ID does not exist!');
-    }
+    const found: Blog = await this.getBlog(blogId);
 
     found.blogEntryList.push(blogEntry);
     await this.writeBlogs();
@@ -101,16 +121,10 @@ export class BlogsService {
   ): Promise<BlogEntry> {
     const { title, content } = editBlogEntryDto;
 
-    const foundBlog: Blog = this.blogs.find((blog) => blog.id === blogId);
-    if (!foundBlog) {
-      throw new NotFoundException('Blog with this ID does not exist!');
-    }
-    const foundBlogEntry: BlogEntry = foundBlog.blogEntryList.find(
-      (blogEntry) => blogEntry.id === blogEntryId,
+    const foundBlogEntry: BlogEntry = await this.getBlogEntry(
+      blogId,
+      blogEntryId,
     );
-    if (!foundBlogEntry) {
-      throw new NotFoundException('Blog Entry with this ID does not exist!');
-    }
 
     if (title) foundBlogEntry.title = title;
     if (content) foundBlogEntry.content = content;
