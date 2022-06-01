@@ -1,4 +1,5 @@
 export class BlogEntry {
+  id: string;
   title: string;
   //ownerId: string;
   dateTime: Date;

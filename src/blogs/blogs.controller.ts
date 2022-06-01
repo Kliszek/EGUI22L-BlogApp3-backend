@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { Blog, BlogEntry } from './blog.class';
 import { BlogsService } from './blogs.service';
 import { CreateBlogDto } from './dto/create-blog';
 import { CreateBlogEntryDto } from './dto/create-blog-entry.dto';
+import { EditBlogEntryDto } from './dto/edit-blog-entry.dto';
 
 @Controller('blogs')
 export class BlogsController {
@@ -18,11 +19,24 @@ export class BlogsController {
     return this.blogsService.createBlog(createBlogDto);
   }
 
-  @Post('/:id')
+  @Post('/:blogId')
   async createBlogEntry(
     @Body() createBlogEntryDto: CreateBlogEntryDto,
-    @Param('id') blogId: string,
+    @Param('blogId') blogId: string,
   ): Promise<BlogEntry> {
     return this.blogsService.createBlogEntry(blogId, createBlogEntryDto);
+  }
+
+  @Patch('/:blogId/:blogEntryId')
+  async editBlogEntry(
+    @Body() editBlogEntryDto: EditBlogEntryDto,
+    @Param('blogId') blogId: string,
+    @Param('blogEntryId') blogEntryId: string,
+  ): Promise<BlogEntry> {
+    return this.blogsService.editBlogEntry(
+      blogId,
+      blogEntryId,
+      editBlogEntryDto,
+    );
   }
 }

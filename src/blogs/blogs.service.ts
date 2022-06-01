@@ -10,6 +10,7 @@ import { v4 as uuid } from 'uuid';
 import { CreateBlogDto } from './dto/create-blog';
 import { ConfigService } from '@nestjs/config';
 import { CreateBlogEntryDto } from './dto/create-blog-entry.dto';
+import { EditBlogEntryDto } from './dto/edit-blog-entry.dto';
 
 @Injectable()
 export class BlogsService {
@@ -77,6 +78,7 @@ export class BlogsService {
   ): Promise<BlogEntry> {
     const { title, content } = createBlogEntryDto;
     const blogEntry: BlogEntry = {
+      id: uuid(),
       title,
       content,
       dateTime: new Date(),
@@ -84,11 +86,37 @@ export class BlogsService {
 
     const found = this.blogs.find((blog) => blog.id === blogId);
     if (!found) {
-      throw new NotFoundException();
+      throw new NotFoundException('Blog with this ID does not exist!');
     }
 
     found.blogEntryList.push(blogEntry);
     await this.writeBlogs();
     return blogEntry;
+  }
+
+  async editBlogEntry(
+    blogId: string,
+    blogEntryId: string,
+    editBlogEntryDto: EditBlogEntryDto,
+  ): Promise<BlogEntry> {
+    const { title, content } = editBlogEntryDto;
+
+    const foundBlog: Blog = this.blogs.find((blog) => blog.id === blogId);
+    if (!foundBlog) {
+      throw new NotFoundException('Blog with this ID does not exist!');
+    }
+    const foundBlogEntry: BlogEntry = foundBlog.blogEntryList.find(
+      (blogEntry) => blogEntry.id === blogEntryId,
+    );
+    if (!foundBlogEntry) {
+      throw new NotFoundException('Blog Entry with this ID does not exist!');
+    }
+
+    if (title) foundBlogEntry.title = title;
+    if (content) foundBlogEntry.content = content;
+
+    this.writeBlogs();
+
+    return foundBlogEntry;
   }
 }
