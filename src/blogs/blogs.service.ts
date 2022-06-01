@@ -133,4 +133,32 @@ export class BlogsService {
 
     return foundBlogEntry;
   }
+
+  async deleteBlog(blogId: string): Promise<void> {
+    const l = this.blogs.length;
+    this.blogs = this.blogs.filter((blog) => blog.id !== blogId);
+
+    if (l === this.blogs.length) {
+      throw new NotFoundException('Blog with this ID does not exist');
+    }
+
+    this.writeBlogs();
+    return;
+  }
+
+  async deleteBlogEntry(blogId: string, blogEntryId: string): Promise<void> {
+    const foundBlogEntry: Blog = await this.getBlog(blogId);
+
+    const l = foundBlogEntry.blogEntryList.length;
+    foundBlogEntry.blogEntryList = foundBlogEntry.blogEntryList.filter(
+      (blogEntry) => blogEntry.id !== blogEntryId,
+    );
+
+    if (l === foundBlogEntry.blogEntryList.length) {
+      throw new NotFoundException('Blog Entry with this ID does not exist');
+    }
+
+    this.writeBlogs();
+    return;
+  }
 }

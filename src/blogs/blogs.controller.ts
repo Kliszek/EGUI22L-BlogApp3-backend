@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { Blog, BlogEntry } from './blog.class';
 import { BlogsService } from './blogs.service';
 import { CreateBlogDto } from './dto/create-blog';
@@ -38,5 +46,18 @@ export class BlogsController {
       blogEntryId,
       editBlogEntryDto,
     );
+  }
+
+  @Delete('/:blogId')
+  async deleteBlog(@Param('blogId') blogId: string): Promise<void> {
+    return this.blogsService.deleteBlog(blogId);
+  }
+
+  @Delete('/:blogId/:blogEntryId')
+  async deleteBlogEntry(
+    @Param('blogId') blogId: string,
+    @Param('blogEntryId') blogEntryId: string,
+  ): Promise<void> {
+    return this.blogsService.deleteBlogEntry(blogId, blogEntryId);
   }
 }
