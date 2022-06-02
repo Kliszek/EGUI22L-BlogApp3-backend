@@ -11,6 +11,8 @@ import { CreateBlogDto } from './dto/create-blog';
 import { ConfigService } from '@nestjs/config';
 import { CreateBlogEntryDto } from './dto/create-blog-entry.dto';
 import { EditBlogEntryDto } from './dto/edit-blog-entry.dto';
+import { User } from 'src/users/user.class';
+import { GetBlogsFilterDto } from './dto/get-blogs-filter.dto';
 
 @Injectable()
 export class BlogsService {
@@ -54,8 +56,11 @@ export class BlogsService {
       });
   }
 
-  async getAllBlogs(): Promise<Blog[]> {
-    return this.blogs;
+  async getAllBlogs(getBlogsFilterDto: GetBlogsFilterDto): Promise<Blog[]> {
+    const { username } = getBlogsFilterDto;
+    if (!!username) {
+      return this.blogs.filter((blog) => blog.ownerId === username);
+    } else return this.blogs;
   }
 
   async getBlog(blogId: string): Promise<Blog> {
@@ -81,13 +86,13 @@ export class BlogsService {
     return foundBlogEntry;
   }
 
-  async createBlog(createBlogDto: CreateBlogDto): Promise<Blog> {
+  async createBlog(createBlogDto: CreateBlogDto, user: User): Promise<Blog> {
     const { title } = createBlogDto;
 
     const blog: Blog = {
       id: uuid(),
       title,
-      ownerId: 'dummyOwner',
+      ownerId: user.username,
       blogEntryList: [],
     };
 
