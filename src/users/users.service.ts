@@ -1,10 +1,17 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './user.class';
 import { v4 as uuid } from 'uuid';
+import { LoginUserDto } from './dto/login-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -52,6 +59,13 @@ export class UsersService {
   async createUser(createUserDto: CreateUserDto): Promise<void> {
     const { username, email, password } = createUserDto;
 
+    if (!!this.users.find((user) => user.email === email)) {
+      throw new ConflictException('Username with this email already exist!');
+    }
+    if (!!this.users.find((user) => user.username === username)) {
+      throw new ConflictException('This username is already taken!');
+    }
+
     const user: User = {
       id: uuid(),
       username,
@@ -62,5 +76,21 @@ export class UsersService {
     this.users.push(user);
     await this.writeUsers();
     return;
+  }
+
+  async getUser(username: string): Promise<User> {
+    const result: User = this.users.find((user) => user.username === username);
+    if (!result) {
+      throw new NotFoundException();
+    } else return result;
+  }
+
+  async logIn(loginUserDto: LoginUserDto): Promise<string> {
+    const { username, password } = loginUserDto;
+    const user: User = await this.getUser(username);
+    if (user.password !== password) {
+      throw new ForbiddenException();
+    }
+    return '';
   }
 }
