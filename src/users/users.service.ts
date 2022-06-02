@@ -6,8 +6,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { readFile, writeFile } from 'fs/promises';
-import { join } from 'path';
+import { mkdir, readFile, writeFile } from 'fs/promises';
+import { dirname, join } from 'path';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './user.class';
 import { v4 as uuid } from 'uuid';
@@ -47,11 +47,14 @@ export class UsersService {
   }
 
   private async writeUsers(): Promise<void> {
-    await writeFile(
-      join(process.cwd(), this.configService.get('USERS_PATH')),
-      JSON.stringify(this.users),
-      'utf-8',
-    )
+    const path = join(process.cwd(), this.configService.get('USERS_PATH'));
+    await mkdir(dirname(path), { recursive: true }).catch((error) => {
+      console.log('error creating the folder');
+      console.log(error);
+      throw new InternalServerErrorException();
+    });
+
+    await writeFile(path, JSON.stringify(this.users), 'utf-8')
       .then(() => {
         console.log('written users to file');
       })

@@ -3,8 +3,8 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { readFile, writeFile } from 'fs/promises';
-import { join } from 'path';
+import { mkdir, readFile, writeFile } from 'fs/promises';
+import { dirname, join } from 'path';
 import { Blog, BlogEntry } from './blog.class';
 import { v4 as uuid } from 'uuid';
 import { CreateBlogDto } from './dto/create-blog';
@@ -41,11 +41,14 @@ export class BlogsService {
   }
 
   private async writeBlogs(): Promise<void> {
-    await writeFile(
-      join(process.cwd(), this.configService.get('BLOGS_PATH')),
-      JSON.stringify(this.blogs),
-      'utf-8',
-    )
+    const path = join(process.cwd(), this.configService.get('BLOGS_PATH'));
+    await mkdir(dirname(path), { recursive: true }).catch((error) => {
+      console.log('error creating the folder');
+      console.log(error);
+      throw new InternalServerErrorException();
+    });
+
+    await writeFile(path, JSON.stringify(this.blogs), 'utf-8')
       .then(() => {
         console.log('written blogs to file');
       })
