@@ -31,7 +31,10 @@ export class BlogsService {
       .catch((error) => {
         console.log('error reading from file');
         console.log(error);
-        throw new InternalServerErrorException();
+        if (error.code === 'ENOENT') {
+          this.blogs = [];
+          console.log('Set blogs to an empty array and continuing...');
+        } else throw new InternalServerErrorException();
       });
   }
 
