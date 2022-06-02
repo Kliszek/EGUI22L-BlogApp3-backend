@@ -6,8 +6,8 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
-  // @Post('signup')
-  // signUp(@Body() createUserDto: CreateUserDto): Promise<void> {
-  //   return this.usersService.createUser(createUserDto);
-  // }
+  @Post('signup')
+  signUp(@Body() createUserDto: CreateUserDto): Promise<void> {
+    return this.usersService.createUser(createUserDto);
+  }
 }

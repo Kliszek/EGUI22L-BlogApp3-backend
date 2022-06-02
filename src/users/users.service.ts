@@ -4,6 +4,7 @@ import { readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './user.class';
+import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class UsersService {
@@ -48,7 +49,18 @@ export class UsersService {
       });
   }
 
-  // async createUser(createUserDto: CreateUserDto): Promise<void> {
+  async createUser(createUserDto: CreateUserDto): Promise<void> {
+    const { username, email, password } = createUserDto;
 
-  // }
+    const user: User = {
+      id: uuid(),
+      username,
+      email,
+      password,
+    };
+
+    this.users.push(user);
+    await this.writeUsers();
+    return;
+  }
 }

@@ -92,9 +92,7 @@ export class BlogsService {
     };
 
     this.blogs.push(blog);
-
     await this.writeBlogs();
-
     return blog;
   }
 
@@ -132,7 +130,7 @@ export class BlogsService {
     if (title) foundBlogEntry.title = title;
     if (content) foundBlogEntry.content = content;
 
-    this.writeBlogs();
+    await this.writeBlogs();
 
     return foundBlogEntry;
   }
@@ -145,7 +143,7 @@ export class BlogsService {
       throw new NotFoundException('Blog with this ID does not exist');
     }
 
-    this.writeBlogs();
+    await this.writeBlogs();
     return;
   }
 
@@ -161,7 +159,7 @@ export class BlogsService {
       throw new NotFoundException('Blog Entry with this ID does not exist');
     }
 
-    this.writeBlogs();
+    await this.writeBlogs();
     return;
   }
 }
