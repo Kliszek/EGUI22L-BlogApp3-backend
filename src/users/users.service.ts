@@ -12,10 +12,16 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './user.class';
 import { v4 as uuid } from 'uuid';
 import { LoginUserDto } from './dto/login-user.dto';
+import { JwtService } from '@nestjs/jwt';
+import { JwtPayload } from './jwt-payload.interface';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private jwtService: JwtService,
+  ) {
     this.readUsers();
   }
 
@@ -66,11 +72,14 @@ export class UsersService {
       throw new ConflictException('This username is already taken!');
     }
 
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(password, salt);
+
     const user: User = {
       id: uuid(),
       username,
       email,
-      password,
+      password: hashedPassword,
     };
 
     this.users.push(user);
@@ -85,12 +94,17 @@ export class UsersService {
     } else return result;
   }
 
-  async logIn(loginUserDto: LoginUserDto): Promise<string> {
+  async logIn(loginUserDto: LoginUserDto): Promise<{ accessToken: string }> {
     const { username, password } = loginUserDto;
     const user: User = await this.getUser(username);
-    if (user.password !== password) {
+
+    if (!(await bcrypt.compare(password, user.password))) {
       throw new ForbiddenException();
     }
-    return '';
+
+    const payload: JwtPayload = { username };
+    const accessToken: string = await this.jwtService.sign(payload);
+
+    return { accessToken };
   }
 }
