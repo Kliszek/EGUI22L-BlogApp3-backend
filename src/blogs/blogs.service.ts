@@ -26,10 +26,10 @@ export class BlogsService {
     )
       .then((data) => {
         this.blogs = JSON.parse(data);
-        console.log('read from file');
+        console.log('read blogs from file');
       })
       .catch((error) => {
-        console.log('error reading from file');
+        console.log('error reading blogs from file');
         console.log(error);
         if (error.code === 'ENOENT') {
           this.blogs = [];
@@ -45,10 +45,10 @@ export class BlogsService {
       'utf-8',
     )
       .then(() => {
-        console.log('written to file');
+        console.log('written blogs to file');
       })
       .catch((error) => {
-        console.log('error writing the file');
+        console.log('error writing blogs the file');
         console.log(error);
         throw new InternalServerErrorException();
       });
