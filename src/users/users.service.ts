@@ -69,7 +69,7 @@ export class UsersService {
     const { username, email, password } = createUserDto;
 
     if (!!this.users.find((user) => user.email === email)) {
-      throw new ConflictException('Username with this email already exist!');
+      throw new ConflictException('Username with this email already exists!');
     }
     if (!!this.users.find((user) => user.username === username)) {
       throw new ConflictException('This username is already taken!');
@@ -93,7 +93,7 @@ export class UsersService {
   async getUser(username: string): Promise<User> {
     const result: User = this.users.find((user) => user.username === username);
     if (!result) {
-      throw new NotFoundException();
+      throw new NotFoundException('User with this username does not exists!');
     } else return result;
   }
 
@@ -102,7 +102,7 @@ export class UsersService {
     const user: User = await this.getUser(username);
 
     if (!(await bcrypt.compare(password, user.password))) {
-      throw new ForbiddenException();
+      throw new ForbiddenException('Provided password is incorrect!');
     }
 
     const payload: JwtPayload = { username };

@@ -24,10 +24,15 @@ export class BlogsController {
   constructor(private blogsService: BlogsService) {}
 
   @Get()
-  async getAllBlogs(
+  async getBlogs(
     @Body() getBlogsFilterDto: GetBlogsFilterDto,
   ): Promise<Blog[]> {
-    return this.blogsService.getAllBlogs(getBlogsFilterDto);
+    return this.blogsService.getBlogs(getBlogsFilterDto);
+  }
+
+  @Get('/:id')
+  async getBlog(@Param('id') blogId: string): Promise<Blog> {
+    return this.blogsService.getBlog(blogId);
   }
 
   @Post()
@@ -42,8 +47,9 @@ export class BlogsController {
   async createBlogEntry(
     @Body() createBlogEntryDto: CreateBlogEntryDto,
     @Param('blogId') blogId: string,
+    @GetUser() user: User,
   ): Promise<BlogEntry> {
-    return this.blogsService.createBlogEntry(blogId, createBlogEntryDto);
+    return this.blogsService.createBlogEntry(blogId, createBlogEntryDto, user);
   }
 
   @Patch('/:blogId/:blogEntryId')
@@ -51,11 +57,13 @@ export class BlogsController {
     @Body() editBlogEntryDto: EditBlogEntryDto,
     @Param('blogId') blogId: string,
     @Param('blogEntryId') blogEntryId: string,
+    @GetUser() user: User,
   ): Promise<BlogEntry> {
     return this.blogsService.editBlogEntry(
       blogId,
       blogEntryId,
       editBlogEntryDto,
+      user,
     );
   }
 
@@ -68,7 +76,8 @@ export class BlogsController {
   async deleteBlogEntry(
     @Param('blogId') blogId: string,
     @Param('blogEntryId') blogEntryId: string,
+    @GetUser() user: User,
   ): Promise<void> {
-    return this.blogsService.deleteBlogEntry(blogId, blogEntryId);
+    return this.blogsService.deleteBlogEntry(blogId, blogEntryId, user);
   }
 }

@@ -1,4 +1,5 @@
 import {
+  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -59,7 +60,7 @@ export class BlogsService {
       });
   }
 
-  async getAllBlogs(getBlogsFilterDto: GetBlogsFilterDto): Promise<Blog[]> {
+  async getBlogs(getBlogsFilterDto: GetBlogsFilterDto): Promise<Blog[]> {
     const { username } = getBlogsFilterDto;
     if (!!username) {
       return this.blogs.filter((blog) => blog.ownerId === username);
@@ -77,8 +78,12 @@ export class BlogsService {
   private async getBlogEntry(
     blogId: string,
     blogEntryId: string,
+    user: User,
   ): Promise<BlogEntry> {
     const foundBlog: Blog = await this.getBlog(blogId);
+    if (foundBlog.ownerId !== user.username) {
+      throw new ForbiddenException('You cannot edit this blog!');
+    }
 
     const foundBlogEntry: BlogEntry = foundBlog.blogEntryList.find(
       (blogEntry) => blogEntry.id === blogEntryId,
@@ -107,6 +112,7 @@ export class BlogsService {
   async createBlogEntry(
     blogId: string,
     createBlogEntryDto: CreateBlogEntryDto,
+    user: User,
   ): Promise<BlogEntry> {
     const { title, content } = createBlogEntryDto;
     const blogEntry: BlogEntry = {
@@ -116,9 +122,12 @@ export class BlogsService {
       dateTime: new Date(),
     };
 
-    const found: Blog = await this.getBlog(blogId);
+    const foundBlog: Blog = await this.getBlog(blogId);
+    if (foundBlog.ownerId !== user.username) {
+      throw new ForbiddenException('You cannot edit this blog!');
+    }
 
-    found.blogEntryList.push(blogEntry);
+    foundBlog.blogEntryList.push(blogEntry);
     await this.writeBlogs();
     return blogEntry;
   }
@@ -127,12 +136,14 @@ export class BlogsService {
     blogId: string,
     blogEntryId: string,
     editBlogEntryDto: EditBlogEntryDto,
+    user: User,
   ): Promise<BlogEntry> {
     const { title, content } = editBlogEntryDto;
 
     const foundBlogEntry: BlogEntry = await this.getBlogEntry(
       blogId,
       blogEntryId,
+      user,
     );
 
     if (title) foundBlogEntry.title = title;
@@ -155,15 +166,22 @@ export class BlogsService {
     return;
   }
 
-  async deleteBlogEntry(blogId: string, blogEntryId: string): Promise<void> {
-    const foundBlogEntry: Blog = await this.getBlog(blogId);
+  async deleteBlogEntry(
+    blogId: string,
+    blogEntryId: string,
+    user: User,
+  ): Promise<void> {
+    const foundBlog: Blog = await this.getBlog(blogId);
+    if (foundBlog.ownerId !== user.username) {
+      throw new ForbiddenException('You cannot edit this blog!');
+    }
 
-    const l = foundBlogEntry.blogEntryList.length;
-    foundBlogEntry.blogEntryList = foundBlogEntry.blogEntryList.filter(
+    const l = foundBlog.blogEntryList.length;
+    foundBlog.blogEntryList = foundBlog.blogEntryList.filter(
       (blogEntry) => blogEntry.id !== blogEntryId,
     );
 
-    if (l === foundBlogEntry.blogEntryList.length) {
+    if (l === foundBlog.blogEntryList.length) {
       throw new NotFoundException('Blog Entry with this ID does not exist');
     }
 
