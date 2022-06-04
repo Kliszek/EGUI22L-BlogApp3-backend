@@ -31,8 +31,15 @@ export class BlogsController {
   }
 
   @Get('/:id')
-  async getBlog(@Param('id') blogId: string): Promise<Blog> {
-    return this.blogsService.getBlog(blogId);
+  async getBlog(
+    @Param('id') blogId: string,
+    @GetUser() user: User,
+  ): Promise<{ blog: Blog; isOwner: boolean }> {
+    const blog = await this.blogsService.getBlog(blogId);
+    return {
+      blog,
+      isOwner: blog.ownerId === user.username,
+    };
   }
 
   @Post()
