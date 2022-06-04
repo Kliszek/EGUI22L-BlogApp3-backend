@@ -104,7 +104,7 @@ export class BlogsService {
       blogEntryList: [],
     };
 
-    this.blogs.push(blog);
+    this.blogs.unshift(blog);
     await this.writeBlogs();
     return blog;
   }
@@ -127,7 +127,7 @@ export class BlogsService {
       throw new ForbiddenException('You cannot edit this blog!');
     }
 
-    foundBlog.blogEntryList.push(blogEntry);
+    foundBlog.blogEntryList.unshift(blogEntry);
     await this.writeBlogs();
     return blogEntry;
   }
