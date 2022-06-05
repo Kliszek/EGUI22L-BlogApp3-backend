@@ -37,6 +37,8 @@ The variables you need to specify are:
 | USERS_PATH    | the path to json file with users |
 | JWT_SECRET    | the JWT secret                   |
 
+Also, make sure to set the right frontend address in for CORS origin in "***./src/main.ts***" file.
+
 After this you can run the project, by executing
 
     npm run start:dev
