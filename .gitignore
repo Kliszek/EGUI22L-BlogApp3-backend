@@ -1,3 +1,9 @@
+# start script
+start.bat
+
+# database files
+/data
+
 # compiled output
 /dist
 /node_modules
